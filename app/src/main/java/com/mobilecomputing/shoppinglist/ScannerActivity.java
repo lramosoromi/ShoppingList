@@ -187,8 +187,14 @@ public class ScannerActivity extends ListActivity {
         ArrayAdapter<Product> adapter = (ArrayAdapter<Product>) getListAdapter();
         Product product;
         switch (view.getId()) {
-            case R.id.delete:
+            case R.id.add:
                 if (getListAdapter().getCount() > 0) {
+                    try {
+                        datasource.addListToInventory(listId);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+/*
                     product = (Product) getListAdapter().getItem(0);
                     try {
                         datasource.deleteProductFromList(listId, product);
@@ -196,6 +202,7 @@ public class ScannerActivity extends ListActivity {
                         e.printStackTrace();
                     }
                     adapter.remove(product);
+*/
                 }
                 break;
         }

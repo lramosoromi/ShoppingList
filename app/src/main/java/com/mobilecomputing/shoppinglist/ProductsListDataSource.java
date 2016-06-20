@@ -293,6 +293,10 @@ public class ProductsListDataSource {
                 MySQLHelper.COLUMN_ID_LIST + "=" + INVENTORY_LIST_ID, null);
     }
 
+    public ProductsList getInventory() {
+        return getProductList(INVENTORY_LIST_ID);
+    }
+
     private ProductsList getProductList(long id) {
         Cursor cursor = database.query(MySQLHelper.TABLE_LIST,
                 allColumns, MySQLHelper.COLUMN_ID_LIST + " = " + id, null,
