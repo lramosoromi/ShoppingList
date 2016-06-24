@@ -187,7 +187,7 @@ public class ScannerActivity extends ListActivity {
         ArrayAdapter<Product> adapter = (ArrayAdapter<Product>) getListAdapter();
         Product product;
         switch (view.getId()) {
-            case R.id.delete:
+            case R.id.delete1:
                 if (getListAdapter().getCount() > 0) {
                     product = (Product) getListAdapter().getItem(0);
                     try {

@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="/home/rolithunderbird/AndroidStudioProjects/ShoppingList/zBarScannerLibrary/src/main/shaders"/></dataSet><dataSet config="debug"><source path="/home/rolithunderbird/AndroidStudioProjects/ShoppingList/zBarScannerLibrary/src/debug/shaders"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="C:\Users\PauliusPC\Documents\GitHub\ShoppingList\zBarScannerLibrary\src\main\shaders"/></dataSet><dataSet config="debug"><source path="C:\Users\PauliusPC\Documents\GitHub\ShoppingList\zBarScannerLibrary\src\debug\shaders"/></dataSet></merger>

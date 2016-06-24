@@ -1,6 +1,10 @@
 [
     {
-        "merged": "/home/rolithunderbird/AndroidStudioProjects/ShoppingList/zBarScannerLibrary/build/intermediates/res/merged/androidTest/debug/drawable-mdpi-v4/ic_launcher.png",
-        "source": "/home/rolithunderbird/AndroidStudioProjects/ShoppingList/zBarScannerLibrary/build/intermediates/bundles/debug/res/drawable-mdpi-v4/ic_launcher.png"
+        "merged": "C:\\Users\\PauliusPC\\Documents\\GitHub\\ShoppingList\\zBarScannerLibrary\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-mdpi-v4\\ic_launcher.png",
+        "source": "C:\\Users\\PauliusPC\\Documents\\GitHub\\ShoppingList\\zBarScannerLibrary\\build\\intermediates\\bundles\\debug\\res\\drawable-mdpi-v4\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\home\\rolithunderbird\\AndroidStudioProjects\\ShoppingList\\zBarScannerLibrary\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-mdpi-v4\\ic_launcher.png",
+        "source": "C:\\home\\rolithunderbird\\AndroidStudioProjects\\ShoppingList\\zBarScannerLibrary\\build\\intermediates\\bundles\\debug\\res\\drawable-mdpi-v4\\ic_launcher.png"
     }
 ]
