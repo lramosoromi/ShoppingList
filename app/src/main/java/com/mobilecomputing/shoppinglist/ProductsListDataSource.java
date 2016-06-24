@@ -48,6 +48,10 @@ public class ProductsListDataSource {
         expiryDates = new ArrayList<>();
     }
 
+    public long getInventoryListId() {
+        return INVENTORY_LIST_ID;
+    }
+
     public void open() throws SQLException {
         database = dbHelper.getWritableDatabase();
     }
@@ -75,6 +79,21 @@ public class ProductsListDataSource {
         }
         cursor.close();
         return newProductsList;
+    }
+
+    public ProductsList getList(long listId) {
+        Cursor cursor = database.query(MySQLHelper.TABLE_LIST,
+                allColumns, MySQLHelper.COLUMN_ID_LIST + " = " + listId, null,
+                null, null, null);
+        cursor.moveToFirst();
+        ProductsList productsList = null;
+        try {
+            productsList = cursorToProductsList(cursor);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        cursor.close();
+        return productsList;
     }
 
     public void deleteList(ProductsList list) {
@@ -125,7 +144,7 @@ public class ProductsListDataSource {
             json = new JSONObject(cursor.getString(2));
             productItems = new ArrayList<>();
             jsonArray = json.optJSONArray("productsArray");
-            if (jsonArray != null) {
+            if (jsonArray != null && !jsonArray.toString().contains("null")) {
                 int len = jsonArray.length();
                 for (int i = 0; i < len; i++) {
                     productItems.add(Product.getObjectFromJSON(jsonArray.get(i).toString()));
@@ -240,14 +259,27 @@ public class ProductsListDataSource {
     public void deleteProductFromList(long id, Product product) throws JSONException {
         ProductsList productsList = getProductList(id);
 
-        productsList.getProducts().remove(product);
-
+        for (int i = 0; i < productsList.getProducts().size(); i++){
+            if (product.getId() == productsList.getProducts().get(i).getId()) {
+                productsList.getProducts().remove(productsList.getProducts().get(i));
+                productsList.getExpiryDates().remove(productsList.getExpiryDates().get(i));
+            }
+        }
         ContentValues values = new ContentValues();
 
-        JSONObject json = new JSONObject();
-        json.put("productsArray", new JSONArray(productsList.getProducts()));
-        String arrayListProducts = json.toString();
+        JSONObject productJsonObj = new JSONObject();
+        productJsonObj.put("productsArray", new JSONArray(productsList.getProducts()));
+        String arrayListProducts = productJsonObj.toString();
         values.put(MySQLHelper.COLUMN_PRODUCTS, arrayListProducts);
+
+        ArrayList<String> expirationDatesAsStringList = new ArrayList<>();
+        for (Date date : productsList.getExpiryDates()) {
+            expirationDatesAsStringList.add(convertToString(date));
+        }
+        JSONObject expirationJsonObj = new JSONObject();
+        expirationJsonObj.put("expiresArrays", new JSONArray(expirationDatesAsStringList));
+        String arrayListExpires = expirationJsonObj.toString();
+        values.put(MySQLHelper.COLUMN_EXPIRATION_DATE, arrayListExpires);
 
         database.update(MySQLHelper.TABLE_LIST, values, MySQLHelper.COLUMN_ID_LIST + "=" + id, null);
     }
@@ -291,6 +323,10 @@ public class ProductsListDataSource {
 
         database.update(MySQLHelper.TABLE_LIST, values,
                 MySQLHelper.COLUMN_ID_LIST + "=" + INVENTORY_LIST_ID, null);
+
+        // End by deleting the list, since now its in the inventory
+        ProductsList list = getList(id);
+        deleteList(list);
     }
 
     public ProductsList getInventory() {
@@ -325,7 +361,7 @@ public class ProductsListDataSource {
         return parsedDate;
     }
 
-    private String convertToString(Date expiryDate) {
+    public String convertToString(Date expiryDate) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         return sdf.format(expiryDate);
     }

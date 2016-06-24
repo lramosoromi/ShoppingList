@@ -4,21 +4,31 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.dm.zbar.android.scanner.ZBarConstants;
+import com.dm.zbar.android.scanner.ZBarScannerActivity;
+
+import org.json.JSONException;
+
 import java.util.List;
 
-public class MainActivity extends ListActivity implements ListView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity {
 
     private ProductsListDataSource datasource;
     private static String INVENTROY_NAME = "INVENTORY";
-    private String inputText = "";
+    private static final int ZBAR_SCANNER_REQUEST = 0;
     private AlarmReceiver alarm = new AlarmReceiver();
 
     @Override
@@ -29,93 +39,135 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
         datasource = new ProductsListDataSource(this);
         datasource.open();
 
-        //start gps
-        Button button_gps = (Button)findViewById(R.id.button_gps);
-        button_gps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this, GPSActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        List<ProductsList> values = datasource.getAllLists();
-
-        // use the SimpleCursorAdapter to show the
-        // elements in a ListView
-        ArrayAdapter<ProductsList> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, values);
-        setListAdapter(adapter);
-
-        //* *EDIT* *
-        ListView listview = (ListView) findViewById(android.R.id.list);
-        listview.setOnItemClickListener(this);
-
         if (!isInventoryCreated())
             createInventory();
 
         //Create the alarm for the ExpirationDateService
         alarm.setAlarm(this);
     }
-    @Override
-    public void onItemClick(AdapterView<?> l, View v, int position, long id) {
-
-        // Then you start a new Activity via Intent
-        Intent intent = new Intent();
-        intent.setClass(this, ScannerActivity.class);
-        intent.putExtra("position", position);
-        // Or / And
-        intent.putExtra("id", id);
-        startActivity(intent);
-    }
 
     // Will be called via the onClick attribute
     // of the buttons in main.xml
-    public void onClick(View view) {
-        @SuppressWarnings("unchecked") final
-        ArrayAdapter<ProductsList> adapter = (ArrayAdapter<ProductsList>) getListAdapter();
-        final ProductsList[] productsList = new ProductsList[1];
+    public void onClick(final View view) {
         switch (view.getId()) {
-            case R.id.add:
-                //Creates popup for the list name
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Set the list name");
-
-                // Set up the input
-                final EditText input = new EditText(this);
-                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
-
-                // Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        inputText = input.getText().toString();
-                        // save the new list to the database
-                        productsList[0] = datasource.createList(inputText);
-                        adapter.add(productsList[0]);
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
+            case R.id.button_lists:
+                Intent intent = new Intent();
+                intent.setClass(this, MyListActivity.class);
+                startActivity(intent);
                 break;
             case R.id.delete:
-                if (getListAdapter().getCount() > 0) {
-                    productsList[0] = (ProductsList) getListAdapter().getItem(0);
-                    datasource.deleteList(productsList[0]);
-                    adapter.remove(productsList[0]);
+                ProductsList inventory = datasource.getInventory();
+                if (inventory.getProducts().size() == 0) {
+                    Toast.makeText(this, "There are no products in the inventory", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                else {
+                    AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+
+                    alertDialog.setTitle("Select way to delete");
+
+                    // Set the button to scan
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Scanner",
+                            new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            launchScanner(view);
+                        }
+                    });
+
+                    // Set the button to write the barcode
+                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Barcode",
+                            new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Create new popup to insert the barcode
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            LinearLayout layout = new LinearLayout(MainActivity.this);
+                            layout.setOrientation(LinearLayout.VERTICAL);
+
+                            builder.setTitle("Insert product barcode");
+                            final EditText editText = new EditText(MainActivity.this);
+                            editText.setHint("Barcode");
+                            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            layout.addView(editText);
+                            builder.setView(layout);
+
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    String barcode = editText.getText().toString();
+                                    long productId = Long.parseLong(barcode);
+                                    Product product = datasource.searchProduct(productId);
+                                    long inventoryListId = datasource.getInventoryListId();
+                                    if (product != null) {
+                                        try {
+                                            datasource.deleteProductFromList(inventoryListId, product);
+                                            Toast.makeText(MainActivity.this,
+                                                    "The product = " + barcode + " was deleted from the inventory",
+                                                    Toast.LENGTH_SHORT).show();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    else {
+                                        Toast.makeText(MainActivity.this,
+                                                "The product " + barcode + " is not in the inventory",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                            builder.show();
+                        }
+                    });
+                    alertDialog.show();
+                }
+                break;
+            case R.id.button_gps:
+                //start gps
+                Intent intent1 = new Intent();
+                intent1.setClass(MainActivity.this, GPSActivity.class);
+                startActivity(intent1);
+                break;
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Product product;
+        final long productId;
+
+        switch (requestCode) {
+            case ZBAR_SCANNER_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    productId = Long.parseLong(data.getStringExtra(ZBarConstants.SCAN_RESULT));
+                    product = datasource.searchProduct(productId);
+                    long inventoryListId = datasource.getInventoryListId();
+                    if (product != null) {
+                        try {
+                            datasource.deleteProductFromList(inventoryListId, product);
+                            Toast.makeText(MainActivity.this,
+                                    "The product = " + productId + " was deleted from the inventory",
+                                    Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        Toast.makeText(MainActivity.this,
+                                "The product = " + productId + " is not in the inventory",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else if(resultCode == RESULT_CANCELED && data != null) {
+                    String error = data.getStringExtra(ZBarConstants.ERROR_INFO);
+                    if(!TextUtils.isEmpty(error)) {
+                        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
         }
-        adapter.notifyDataSetChanged();
     }
+
 
     @Override
     protected void onResume() {
@@ -125,7 +177,7 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
 
     @Override
     protected void onPause() {
-        datasource.close();
+        //datasource.close();
         super.onPause();
     }
 
@@ -142,4 +194,19 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
     private void createInventory() {
         datasource.createList(INVENTROY_NAME);
     }
+
+    private void launchScanner(View v) {
+        if (isCameraAvailable()) {
+            Intent intent = new Intent(this, ZBarScannerActivity.class);
+            startActivityForResult(intent, ZBAR_SCANNER_REQUEST);
+        } else {
+            Toast.makeText(this, "Rear Facing Camera Unavailable", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean isCameraAvailable() {
+        PackageManager pm = getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    }
+
 }

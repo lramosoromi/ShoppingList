@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MyListActivity">
 
     <LinearLayout
         android:id="@+id/group"
@@ -13,24 +13,16 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/delete"
+            android:id="@+id/add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete Product"
-            android:onClick="onClick"/>
-
-        <Button
-            android:id="@+id/button_gps"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="GPS"
-            android:onClick="onClick"/>
-
-        <Button
-            android:id="@+id/button_lists"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Go to lists"
+            android:text="Add New"
             android:onClick="onClick"/>
     </LinearLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
 </LinearLayout>
