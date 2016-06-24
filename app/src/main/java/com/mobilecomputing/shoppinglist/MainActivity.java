@@ -2,21 +2,15 @@ package com.mobilecomputing.shoppinglist;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.List;
 
@@ -29,15 +23,6 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        LocationManager locMan = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        Location loc = locMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(loc!=null){
-            TextView text_lat = (TextView)findViewById(R.id.lat);
-            TextView text_log = (TextView)findViewById(R.id.log);
-            text_lat.setText(Double.toString(loc.getLatitude()));
-            text_log.setText(Double.toString(loc.getLongitude()));
-        }
 
         datasource = new ProductsListDataSource(this);
         datasource.open();
@@ -110,10 +95,6 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
                     adapter.remove(productsList[0]);
                 }
                 break;
-            case R.id.gps:
-                Intent intent_gps = new Intent();
-                intent_gps.setClass(this, LocationTestActivity.class);
-                startActivity(intent_gps);
         }
         adapter.notifyDataSetChanged();
     }
