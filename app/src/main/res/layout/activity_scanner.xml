@@ -21,10 +21,10 @@
             android:text="Scan" />
 
         <Button
-            android:id="@+id/delete1"
+            android:id="@+id/add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete First"
+            android:text="Add list to Inventory"
             android:onClick="onClick"/>
     </LinearLayout>
 

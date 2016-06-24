@@ -11,13 +11,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-
 import java.util.List;
 
 public class MainActivity extends ListActivity implements ListView.OnItemClickListener {
 
     private ProductsListDataSource datasource;
+    private static String INVENTROY_NAME = "INVENTORY";
     private String inputText = "";
+    private AlarmReceiver alarm = new AlarmReceiver();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,12 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
         //* *EDIT* *
         ListView listview = (ListView) findViewById(android.R.id.list);
         listview.setOnItemClickListener(this);
+
+        if (!isInventoryCreated())
+            createInventory();
+
+        //Create the alarm for the ExpirationDateService
+        alarm.setAlarm(this);
     }
 
     @Override
@@ -109,5 +116,19 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
     protected void onPause() {
         datasource.close();
         super.onPause();
+    }
+
+    private boolean isInventoryCreated() {
+        List<ProductsList> lists = datasource.getAllLists();
+        for (ProductsList prodList : lists) {
+            String listName = prodList.getName();
+            if (listName.equals(INVENTROY_NAME))
+                return true;
+        }
+        return false;
+    }
+
+    private void createInventory() {
+        datasource.createList(INVENTROY_NAME);
     }
 }

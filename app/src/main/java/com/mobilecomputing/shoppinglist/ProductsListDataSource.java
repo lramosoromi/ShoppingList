@@ -33,6 +33,8 @@ public class ProductsListDataSource {
 
     //Other fields
     private ProductsDataSource datasource;
+    private static String INVENTORY_NAME = "INVENTORY";
+    private static long INVENTORY_LIST_ID = 1;
     private boolean isProductInDatabase;
     private List<Product> productsList;
     private List<Date> expiryDates;
@@ -82,6 +84,11 @@ public class ProductsListDataSource {
                 + " = " + id, null);
     }
 
+    /**
+     * Returns all the lists in the list database except for the inventory list, which is handled
+     * internally
+     * @return
+     */
     public List<ProductsList> getAllLists() {
         List<ProductsList> productsLists = new ArrayList<>();
 
@@ -96,7 +103,8 @@ public class ProductsListDataSource {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            productsLists.add(productsList);
+            if (productsList != null && !productsList.getName().equals(INVENTORY_NAME))
+                productsLists.add(productsList);
             cursor.moveToNext();
         }
         // make sure to close the cursor
@@ -217,6 +225,18 @@ public class ProductsListDataSource {
         return listProducts;
     }
 
+    private List<Date> getExpiryDatesInList(long id) {
+        List<Date> listExpiryDates;
+
+        ProductsList productsList = getProductList(id);
+        if (productsList.getExpiryDates() == null)
+            listExpiryDates = new ArrayList<>();
+        else
+            listExpiryDates = productsList.getExpiryDates();
+
+        return listExpiryDates;
+    }
+
     public void deleteProductFromList(long id, Product product) throws JSONException {
         ProductsList productsList = getProductList(id);
 
@@ -230,6 +250,51 @@ public class ProductsListDataSource {
         values.put(MySQLHelper.COLUMN_PRODUCTS, arrayListProducts);
 
         database.update(MySQLHelper.TABLE_LIST, values, MySQLHelper.COLUMN_ID_LIST + "=" + id, null);
+    }
+
+    public void addListToInventory(long id) throws JSONException {
+        ArrayList<Product> productList = (ArrayList<Product>) getAllProductsInList(id);
+        ArrayList<Date> expiryDatesList = (ArrayList<Date>) getExpiryDatesInList(id);
+
+        JSONObject productJsonObj = new JSONObject();
+        JSONArray productsArray = new JSONArray();
+        JSONObject expirationJsonObj = new JSONObject();
+
+        ProductsList inventoryList = getProductList(INVENTORY_LIST_ID);
+        ArrayList<Product> productsInInventory = (ArrayList<Product>) inventoryList.getProducts();
+        ArrayList<Date> expiryDatesInInventory = (ArrayList<Date>) inventoryList.getExpiryDates();
+
+        //CUANDO HAGO EL GETPRODUCTS ME TIRA QUE GETPRODUCTS DA NULL
+        for (Product product : productList) {
+            productsInInventory.add(product);
+        }
+        for (Date expiryDate : expiryDatesList) {
+            expiryDatesInInventory.add(expiryDate);
+        }
+
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < productsInInventory.size(); i++) {
+            productsArray.put(productsInInventory.get(i).getJSONObject());
+        }
+        productJsonObj.put("productsArray", productsArray);
+        String arrayListProducts = productJsonObj.toString();
+        values.put(MySQLHelper.COLUMN_PRODUCTS, arrayListProducts);
+
+        ArrayList<String> expirationDatesAsStringList = new ArrayList<>();
+        for (Date date : expiryDatesInInventory) {
+            expirationDatesAsStringList.add(convertToString(date));
+        }
+        expirationJsonObj.put("expiresArrays", new JSONArray(expirationDatesAsStringList));
+        String arrayListExpires = expirationJsonObj.toString();
+        values.put(MySQLHelper.COLUMN_EXPIRATION_DATE, arrayListExpires);
+
+        database.update(MySQLHelper.TABLE_LIST, values,
+                MySQLHelper.COLUMN_ID_LIST + "=" + INVENTORY_LIST_ID, null);
+    }
+
+    public ProductsList getInventory() {
+        return getProductList(INVENTORY_LIST_ID);
     }
 
     private ProductsList getProductList(long id) {
