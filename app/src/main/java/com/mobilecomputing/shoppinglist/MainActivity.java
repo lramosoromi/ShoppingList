@@ -9,6 +9,7 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import java.util.List;
@@ -28,6 +29,17 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
         datasource = new ProductsListDataSource(this);
         datasource.open();
 
+        //start gps
+        Button button_gps = (Button)findViewById(R.id.button_gps);
+        button_gps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, GPSActivity.class);
+                startActivity(intent);
+            }
+        });
+
         List<ProductsList> values = datasource.getAllLists();
 
         // use the SimpleCursorAdapter to show the
@@ -46,7 +58,6 @@ public class MainActivity extends ListActivity implements ListView.OnItemClickLi
         //Create the alarm for the ExpirationDateService
         alarm.setAlarm(this);
     }
-
     @Override
     public void onItemClick(AdapterView<?> l, View v, int position, long id) {
 
