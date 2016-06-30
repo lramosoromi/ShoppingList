@@ -53,8 +53,8 @@ public class MyListActivity extends ListActivity implements ListView.OnItemClick
         final AlertDialog alert = new AlertDialog.Builder(this).create();
 
         List<ProductsList> lists = datasource.getAllLists();
-        long listId = lists.get(position).getId();
-        alert.setTitle("List " + datasource.getList(listId).getName());
+        String listName = lists.get(position).getName();
+        alert.setTitle("List " + listName);
 
         // Set the button to edit
         alert.setButton(AlertDialog.BUTTON_POSITIVE, "Edit List", new DialogInterface.OnClickListener() {

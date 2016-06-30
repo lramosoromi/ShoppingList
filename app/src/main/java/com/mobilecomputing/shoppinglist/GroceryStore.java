@@ -1,5 +1,7 @@
 package com.mobilecomputing.shoppinglist;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by rolithunderbird on 17.06.16.
  */
@@ -7,7 +9,7 @@ public class GroceryStore {
     private long id;
     private String name;
     private String address;
-    private String coordinates;
+    private LatLng coordinates;
 
 
     public long getId() {
@@ -34,11 +36,11 @@ public class GroceryStore {
         this.address = address;
     }
 
-    public String getCoordinates() {
+    public LatLng getCoordinates() {
         return coordinates;
     }
 
-    public void setCoordinates(String coordinates) {
+    public void setCoordinates(LatLng coordinates) {
         this.coordinates = coordinates;
     }
 }

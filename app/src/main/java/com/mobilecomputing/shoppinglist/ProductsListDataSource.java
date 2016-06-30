@@ -52,6 +52,26 @@ public class ProductsListDataSource {
         return INVENTORY_LIST_ID;
     }
 
+    public boolean isInventoryCreated() {
+        Cursor cursor = database.query(MySQLHelper.TABLE_LIST,
+                allColumns, null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            ProductsList productsList = null;
+            try {
+                productsList = cursorToProductsList(cursor);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            // Check if the inventory list is created
+            if (productsList != null && productsList.getName().equals(INVENTORY_NAME))
+                return true;
+            cursor.moveToNext();
+        }
+        return false;
+    }
+
     public void open() throws SQLException {
         database = dbHelper.getWritableDatabase();
     }
@@ -122,6 +142,7 @@ public class ProductsListDataSource {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            // I check not to return the inventory list so as to not show it in the list activity
             if (productsList != null && !productsList.getName().equals(INVENTORY_NAME))
                 productsLists.add(productsList);
             cursor.moveToNext();

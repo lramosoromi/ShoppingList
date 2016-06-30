@@ -4,4 +4,5 @@
     <string name="start_text">Start Alarm</string>
     <string name="cancel_text">Cancel Alarm</string>
     <string name="expiration_alert">Product Alert</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

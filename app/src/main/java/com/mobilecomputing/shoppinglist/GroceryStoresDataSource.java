@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,14 +35,13 @@ public class GroceryStoresDataSource {
         dbHelper.close();
     }
 
-    public GroceryStore createGroceryStore(long id, String name, String address, String coordinates) {
+    public GroceryStore createGroceryStore(String name, String address, String coordinates) {
         ContentValues values = new ContentValues();
-        values.put(MySQLHelper.COLUMN_ID_GROCERY_STORE, id);
         values.put(MySQLHelper.COLUMN_NAME_GROCERY_STORE, name);
         values.put(MySQLHelper.COLUMN_ADDRESS, address);
         values.put(MySQLHelper.COLUMN_COORDINATES, coordinates);
 
-        database.insert(MySQLHelper.TABLE_GROCERY_STORES, null, values);
+        long id = database.insert(MySQLHelper.TABLE_GROCERY_STORES, null, values);
         Cursor cursor = database.query(MySQLHelper.TABLE_GROCERY_STORES,
                 allColumns, MySQLHelper.COLUMN_ID_GROCERY_STORE + " = " + id, null,
                 null, null, null);
@@ -89,7 +90,9 @@ public class GroceryStoresDataSource {
         groceryStore.setId(cursor.getLong(0));
         groceryStore.setName(cursor.getString(1));
         groceryStore.setAddress(cursor.getString(2));
-        groceryStore.setCoordinates(cursor.getString(3));
+        String[] coordinates = cursor.getString(3).split(",");
+        groceryStore.setCoordinates(new LatLng(Float.parseFloat(coordinates[0]),
+                                        Float.parseFloat(coordinates[1])));
         return groceryStore;
     }
 }

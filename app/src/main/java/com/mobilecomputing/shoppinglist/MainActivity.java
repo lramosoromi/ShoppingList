@@ -1,7 +1,6 @@
 package com.mobilecomputing.shoppinglist;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,11 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dm.zbar.android.scanner.ZBarConstants;
@@ -22,12 +18,11 @@ import com.dm.zbar.android.scanner.ZBarScannerActivity;
 
 import org.json.JSONException;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
 
     private ProductsListDataSource datasource;
-    private static String INVENTROY_NAME = "INVENTORY";
+    private GroceryStoresDataSource groceryStoresDataSource;
+    private static String INVENTORY_NAME = "INVENTORY";
     private static final int ZBAR_SCANNER_REQUEST = 0;
     private AlarmReceiver alarm = new AlarmReceiver();
 
@@ -39,8 +34,14 @@ public class MainActivity extends AppCompatActivity {
         datasource = new ProductsListDataSource(this);
         datasource.open();
 
-        if (!isInventoryCreated())
+        groceryStoresDataSource = new GroceryStoresDataSource(this);
+        groceryStoresDataSource.open();
+
+        // With this I check if its the first time I use the app
+        if (!isInventoryCreated()) {
             createInventory();
+            addGroceryStores();
+        }
 
         //Create the alarm for the ExpirationDateService
         alarm.setAlarm(this);
@@ -122,10 +123,10 @@ public class MainActivity extends AppCompatActivity {
                     alertDialog.show();
                 }
                 break;
-            case R.id.button_gps:
+            case R.id.button_map:
                 //start gps
                 Intent intent1 = new Intent();
-                intent1.setClass(MainActivity.this, GPSActivity.class);
+                intent1.setClass(MainActivity.this, MapsActivity.class);
                 startActivity(intent1);
                 break;
 
@@ -181,18 +182,17 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     private boolean isInventoryCreated() {
-        List<ProductsList> lists = datasource.getAllLists();
-        for (ProductsList prodList : lists) {
-            String listName = prodList.getName();
-            if (listName.equals(INVENTROY_NAME))
-                return true;
-        }
-        return false;
+        return datasource.isInventoryCreated();
     }
 
     private void createInventory() {
-        datasource.createList(INVENTROY_NAME);
+        datasource.createList(INVENTORY_NAME);
     }
 
     private void launchScanner(View v) {
@@ -209,4 +209,26 @@ public class MainActivity extends AppCompatActivity {
         return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
+    private void addGroceryStores() {
+        groceryStoresDataSource.createGroceryStore(
+                "Example Grocery Store",
+                "Pestalozzistraße 62, 72762 Reutlingen, Germany",
+                "48.482964, 9.187570");
+        groceryStoresDataSource.createGroceryStore(
+                "PENNY Markt Filiale",
+                "Pestalozzistraße 5, 72762 Reutlingen, Germany",
+                "48.484860, 9.194667");
+        groceryStoresDataSource.createGroceryStore(
+                "Edeka Möck",
+                "Friedrich-Naumann-Straße 36, 72762 Reutlingen, Germany",
+                "48.487295, 9.190938");
+        groceryStoresDataSource.createGroceryStore(
+                "Edeka",
+                "An der Kreuzeiche 23, 72762 Reutlingen, Germany",
+                "48.479022, 9.199114");
+        groceryStoresDataSource.createGroceryStore(
+                "Aldi Süd",
+                "Ringelbachstraße 183, 72762 Reutlingen, Germany",
+                "48.477935, 9.200150");
+    }
 }

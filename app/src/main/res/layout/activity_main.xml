@@ -10,7 +10,8 @@
         android:id="@+id/group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/delete"
@@ -20,10 +21,10 @@
             android:onClick="onClick"/>
 
         <Button
-            android:id="@+id/button_gps"
+            android:id="@+id/button_map"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GPS"
+            android:text="Map"
             android:onClick="onClick"/>
 
         <Button

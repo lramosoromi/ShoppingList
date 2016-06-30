@@ -9,8 +9,6 @@ import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import java.util.Calendar;
-
 /**
  * Created by rolithunderbird on 20.06.16.
  */
@@ -38,10 +36,15 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
          * In this example, we simply create a new intent to deliver to the service.
          * This intent holds an extra identifying the wake lock.
          */
-        Intent service = new Intent(context, ExpirationDateService.class);
+        Intent expDateService = new Intent(context, ExpirationDateService.class);
 
         // Start the service, keeping the device awake while it is launching.
-        startWakefulService(context, service);
+        startWakefulService(context, expDateService);
+
+        //Intent grStService = new Intent(context, GroceryStoresService.class);
+
+        // Start the service, keeping the device awake while it is launching.
+        //startWakefulService(context, grStService);
         // END_INCLUDE(alarm_onreceive)
     }
 
