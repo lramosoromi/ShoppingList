@@ -83,6 +83,7 @@ public class GroceryStoresService extends IntentService implements
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
+                        .setAutoCancel(true)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("You are near " + groceryStore.getName())
                         .setStyle(new NotificationCompat.BigTextStyle()

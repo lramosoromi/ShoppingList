@@ -76,19 +76,24 @@ public class ExpirationDateService extends IntentService {
         AlarmReceiver.completeWakefulIntent(intent);
         // END_INCLUDE(service_onhandle)
     }
+
     // Post a notification indicating whether a doodle was found.
     private void sendProductNotification(String msg) {
+        int requestID = (int) System.currentTimeMillis();
+        Intent notificationIntent = new Intent(this, NotificationResultActivity.class);
+        // set intent so it does not start a new activity
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                this, requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
+                        .setAutoCancel(true)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle(getString(R.string.expiration_alert))
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, NotificationResultActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentIntent(contentIntent);
 
