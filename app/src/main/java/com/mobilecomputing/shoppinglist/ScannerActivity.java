@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dm.zbar.android.scanner.ZBarConstants;
@@ -60,7 +61,8 @@ public class ScannerActivity extends ListActivity implements ListView.OnItemClic
                 android.R.layout.simple_list_item_1, values);
         setListAdapter(adapter);
 
-        //* *EDIT* *
+        TextView text = (TextView) findViewById(R.id.textView2);
+        text.setText("Products in list " + lists.get(position).getName());
         ListView listview = (ListView) findViewById(android.R.id.list);
         listview.setOnItemClickListener(this);
     }
@@ -211,6 +213,7 @@ public class ScannerActivity extends ListActivity implements ListView.OnItemClic
                                 Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent();
                         intent.setClass(this, MyListActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
                     } catch (JSONException e) {
                         e.printStackTrace();

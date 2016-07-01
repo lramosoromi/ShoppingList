@@ -24,12 +24,16 @@ public class MainActivity extends AppCompatActivity {
     private GroceryStoresDataSource groceryStoresDataSource;
     private static String INVENTORY_NAME = "INVENTORY";
     private static final int ZBAR_SCANNER_REQUEST = 0;
+    private boolean notificationBack;
     private AlarmReceiver alarm = new AlarmReceiver();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+        notificationBack = intent.getBooleanExtra("notificationBack", false);
 
         datasource = new ProductsListDataSource(this);
         datasource.open();
@@ -127,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 //start gps
                 Intent intent1 = new Intent();
                 intent1.setClass(MainActivity.this, MapsActivity.class);
+                intent1.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent1);
                 break;
 

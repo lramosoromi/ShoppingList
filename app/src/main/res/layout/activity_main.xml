@@ -4,34 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:weightSum="1">
 
-    <LinearLayout
-        android:id="@+id/group"
+    <Button
+        android:id="@+id/delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical">
+        android:layout_marginTop="150dp"
+        android:text="Delete Product"
+        android:onClick="onClick"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.12" />
 
-        <Button
-            android:id="@+id/delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Delete Product"
-            android:onClick="onClick"/>
+    <Button
+        android:id="@+id/button_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Map"
+        android:onClick="onClick"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.12" />
 
-        <Button
-            android:id="@+id/button_map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Map"
-            android:onClick="onClick"/>
+    <Button
+        android:id="@+id/button_lists"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go to lists"
+        android:onClick="onClick"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.12" />
 
-        <Button
-            android:id="@+id/button_lists"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Go to lists"
-            android:onClick="onClick"/>
-    </LinearLayout>
 </LinearLayout>

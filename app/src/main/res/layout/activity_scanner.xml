@@ -8,31 +8,31 @@
     android:layout_height="fill_parent"
     tools:context=".ScannerActivity">
 
-    <LinearLayout
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/scan_btn"
-            android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:onClick="onClick"
-            android:text="Add Product" />
-
-        <Button
-            android:id="@+id/add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add list to Inventory"
-            android:onClick="onClick"/>
-    </LinearLayout>
+        android:text="Large Text"
+        android:id="@+id/textView2" />
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="387dp"
         />
 
+    <Button
+        android:id="@+id/scan_btn"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:onClick="onClick"
+        android:text="Add Product" />
 
+    <Button
+        android:id="@+id/add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="Add list to Inventory"
+        android:onClick="onClick"/>
 </LinearLayout>

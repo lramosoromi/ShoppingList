@@ -41,10 +41,10 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         // Start the service, keeping the device awake while it is launching.
         startWakefulService(context, expDateService);
 
-        //Intent grStService = new Intent(context, GroceryStoresService.class);
+        Intent grStService = new Intent(context, GroceryStoresService.class);
 
         // Start the service, keeping the device awake while it is launching.
-        //startWakefulService(context, grStService);
+        startWakefulService(context, grStService);
         // END_INCLUDE(alarm_onreceive)
     }
 
@@ -95,7 +95,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         //alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,
         //        calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
         alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(),
-                10 * 1000, alarmIntent);
+                20 * 1000, alarmIntent);
 
         // Enable {@code SampleBootReceiver} to automatically restart the alarm when the
         // device is rebooted.

@@ -4,25 +4,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MyListActivity">
+    tools:context=".MyListActivity"
+    android:weightSum="1">
 
-    <LinearLayout
-        android:id="@+id/group"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add New"
-            android:onClick="onClick"/>
-    </LinearLayout>
+        android:text="Your lists:"
+        android:id="@+id/textView"/>
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
+        android:layout_height="435dp"
+        android:layout_weight="0.77" />
+    <Button
+        android:id="@+id/add"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        android:layout_gravity="bottom"
+        android:text="Add New"
+        android:onClick="onClick"/>
 </LinearLayout>

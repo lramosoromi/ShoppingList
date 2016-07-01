@@ -1,6 +1,5 @@
 package com.mobilecomputing.shoppinglist;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -9,56 +8,57 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-
+import android.support.v7.app.AppCompatActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by rolithunderbird on 30.06.16.
  */
-public class GroceryStoresService extends IntentService implements
+public class GroceryStoresService implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener {
 
+    private Context context;
     // An ID used to post the notification.
     public static final int NOTIFICATION_ID = 2;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private Location mLocation;
+    /**
+     * Request code for location permission request.
+     *
+     */
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private boolean connectionFinished = false;
 
 
-    public GroceryStoresService() {
-        super("GroceryStoresService");
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    public GroceryStoresService(Context cont) {
+        context = cont;
         buildGoogleApiClient();
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void start(Intent intent) {
 
-        GroceryStoresDataSource groceryStoresDataSource = new GroceryStoresDataSource(this);
+        GroceryStoresDataSource groceryStoresDataSource = new GroceryStoresDataSource(context);
         groceryStoresDataSource.open();
 
         if (!mGoogleApiClient.isConnected())
             mGoogleApiClient.connect();
 
         // BEGIN_INCLUDE(service_onhandle)
-
+        //Wait for GoogleApiClient connection
+        while (!connectionFinished) {
+            SystemClock.sleep(10);
+        }
         //Check the grocery stores
         if (mLocation != null) {
             ArrayList<GroceryStore> stores = (ArrayList<GroceryStore>) groceryStoresDataSource.getAllGroceryStores();
@@ -80,9 +80,17 @@ public class GroceryStoresService extends IntentService implements
 
     // Post a notification indicating whether a doodle was found.
     private void sendGroceryStoreNotification(String msg, GroceryStore groceryStore) {
+        int requestID = (int) System.currentTimeMillis();
+        Intent notificationIntent = new Intent(context, MapsActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        notificationIntent.putExtra("notification", true);
+        // set intent so it does not start a new activity
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                context, requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
+                new NotificationCompat.Builder(context)
                         .setAutoCancel(true)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("You are near " + groceryStore.getName())
@@ -90,13 +98,10 @@ public class GroceryStoresService extends IntentService implements
                                 .bigText(msg))
                         .setContentText(msg);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MapsActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-
         mBuilder.setContentIntent(contentIntent);
 
         NotificationManager mNotificationManager = (NotificationManager)
-                this.getSystemService(Context.NOTIFICATION_SERVICE);
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
@@ -104,20 +109,17 @@ public class GroceryStoresService extends IntentService implements
     @Override
     public void onConnected(Bundle bundle) {
         if (ActivityCompat.checkSelfPermission(
-                this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(
-                this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+                context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            PermissionUtils.requestPermission(new AppCompatActivity(), LOCATION_PERMISSION_REQUEST_CODE,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION, true);
             return;
         }
         mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         startLocationUpdate();
+        connectionFinished = true;
     }
 
     @Override
@@ -130,17 +132,6 @@ public class GroceryStoresService extends IntentService implements
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
     }
 
@@ -148,16 +139,12 @@ public class GroceryStoresService extends IntentService implements
         initLocationRequest();
 
         if (ActivityCompat.checkSelfPermission(
-                this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(
-                this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+                context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            PermissionUtils.requestPermission(new AppCompatActivity(), LOCATION_PERMISSION_REQUEST_CODE,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION, true);
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
@@ -176,7 +163,7 @@ public class GroceryStoresService extends IntentService implements
     }
 
     protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        mGoogleApiClient = new GoogleApiClient.Builder(context)
                 .addOnConnectionFailedListener(this)
                 .addConnectionCallbacks(this)
                 .addApi(LocationServices.API)

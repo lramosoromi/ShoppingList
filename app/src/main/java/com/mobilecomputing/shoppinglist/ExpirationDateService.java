@@ -72,6 +72,9 @@ public class ExpirationDateService extends IntentService {
         if (productsToExpire.size() > 0)
             sendProductNotification("Products about to expire");
 
+        GroceryStoresService groceryStoresService = new GroceryStoresService(this);
+        groceryStoresService.start(intent);
+
         // Release the wake lock provided by the BroadcastReceiver.
         AlarmReceiver.completeWakefulIntent(intent);
         // END_INCLUDE(service_onhandle)
@@ -81,6 +84,7 @@ public class ExpirationDateService extends IntentService {
     private void sendProductNotification(String msg) {
         int requestID = (int) System.currentTimeMillis();
         Intent notificationIntent = new Intent(this, NotificationResultActivity.class);
+
         // set intent so it does not start a new activity
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(

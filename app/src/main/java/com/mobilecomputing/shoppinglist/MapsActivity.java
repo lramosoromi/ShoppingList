@@ -1,5 +1,6 @@
 package com.mobilecomputing.shoppinglist;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -37,17 +38,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      *
      */
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-
     public GroceryStoresDataSource dataSource;
-
     LocationManagerCheck locationManagerCheck;
-
+    private boolean isNotificationActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        Intent intent = getIntent();
+        boolean notificationBool = intent.getBooleanExtra("notification", false);
+
+        if (notificationBool) {
+            isNotificationActivity = true;
+        }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -145,6 +150,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             showMissingPermissionError();
             mPermissionDenied = false;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+        finish();
     }
 
     /**

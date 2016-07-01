@@ -63,6 +63,7 @@ public class MyListActivity extends ListActivity implements ListView.OnItemClick
                 // Then you start a new Activity via Intent
                 Intent intent = new Intent();
                 intent.setClass(MyListActivity.this, ScannerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 intent.putExtra("position", position);
                 // Or / And
                 intent.putExtra("id", id);
@@ -129,7 +130,9 @@ public class MyListActivity extends ListActivity implements ListView.OnItemClick
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
+        finish();
     }
 
     @Override
